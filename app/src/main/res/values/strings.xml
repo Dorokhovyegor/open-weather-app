@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">OpenWeatherApp</string>
+    <string name="input_coord_hint_input_layout">Введите координаты</string>
+    <string name="input_data_text_view">Ввод данных</string>
+    <string name="response_label_text_view">Полученный результат</string>
+
+    <string name="text_error">Ошибка</string>
+    <string name="text_success">Успех</string>
+    <string name="text_ok">OK</string>
+    <string name="text_cancel">Отмена</string>
+    <string name="text_info">Инфо</string>
+    <string name="are_you_sure">Вы уверены?</string>
+    <string name="text_yes">Да</string>
+    <string name="empty_list_textView">Список пуст</string>
+    <string name="temp_string">%1d \u2103</string>
+</resources>
