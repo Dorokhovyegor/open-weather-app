@@ -34,15 +34,8 @@ constructor(
         }
 
         return object : NetworkBoundResource<WeatherResponse, Any, WeatherViewState>(
-            networkManager.isConnectedToTheInternet(),
-            true,
-            true,
-            false
+            networkManager.isConnectedToTheInternet()
         ) {
-
-            override suspend fun createCasheRequestAndReturn() {
-
-            }
 
             override suspend fun handleApiSuccessResponse(response: ApiSuccessResponse<WeatherResponse>) {
                 val modList: java.util.ArrayList<WeatherModel> = ArrayList()
@@ -106,14 +99,6 @@ constructor(
                 )
             }
 
-            override fun loadFromCache(): LiveData<WeatherViewState> {
-                return AbsentLiveData.create()
-            }
-
-            // not use in this case (yet)
-            override suspend fun updateLocalDb(cacheObject: Any?) {
-
-            }
 
             override fun setJob(job: Job) {
                 addJob("getWeatherFromCurrentCircle", job)

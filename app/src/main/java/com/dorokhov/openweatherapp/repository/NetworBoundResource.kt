@@ -15,10 +15,8 @@ import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 
 abstract class NetworkBoundResource<ResponseObject, CacheObject, ViewStateType>(
-    isNetworkAvailable: Boolean, // is there a network connection?
-    isNetworkRequest: Boolean, // is this a network request?
-    shouldCancelIfNoInternet: Boolean, // should this job be cancelled if there is no network?
-    shouldLoadFromCache: Boolean // should be cached data be loaded?
+    isNetworkAvailable: Boolean
+
 ) {
 
     private val TAG = "AppDebug"
@@ -29,43 +27,12 @@ abstract class NetworkBoundResource<ResponseObject, CacheObject, ViewStateType>(
     init {
         setJob(initNewJob())
         setValue(DataState.loading(true, cashedData = null))
-
-        if (shouldLoadFromCache) {
-            val dbSource = loadFromCache()
-            result.addSource(dbSource) {
-                result.removeSource(dbSource)
-                setValue(DataState.loading(true, cashedData = it))
-            }
-        }
-
-        if (isNetworkRequest) {
-            if (isNetworkAvailable) {
-                doNetworkRequest()
-            } else {
-                if (shouldCancelIfNoInternet) {
-                    onErrorReturn(UNABLE_TODO_OPERATION_WO_INTERNET, true, false)
-                } else {
-                    doCacheRequest()
-                }
-            }
-        } else { // если не требуется соединение с интернетом
-            doCacheRequest()
-        }
-    }
-
-    private fun doCacheRequest() {
-        coroutineScope.launch {
-            // delay for test
-            delay(Constants.TESTING_CACHE_DELAY)
-            // View data from cache ONLY and return
-            createCasheRequestAndReturn()
-        }
+        doNetworkRequest()
     }
 
     private fun doNetworkRequest() {
         // корутины стартуют одновременно, если первый не успеет выполнится, второй отменяет запущенную работу, как таймаут
         coroutineScope.launch {
-            // simulate delay
             // switch context coroutine
             withContext(Main) {
                 val apiResponse = createCall()
@@ -81,7 +48,6 @@ abstract class NetworkBoundResource<ResponseObject, CacheObject, ViewStateType>(
         GlobalScope.launch(IO) {
             delay(Constants.NETWORK_TIMEOUT)
             if (!job.isCompleted) {
-                Log.e(TAG, "NetworkBoundResource: Job network timeout")
                 job.cancel(CancellationException(UNABLE_TO_RESOLVE_HOST))
             }
         }
@@ -141,7 +107,6 @@ abstract class NetworkBoundResource<ResponseObject, CacheObject, ViewStateType>(
 
     @UseExperimental(InternalCoroutinesApi::class)
     private fun initNewJob(): Job {
-        Log.d(TAG, "initNewJob: Called...")
         job = Job()
         job.invokeOnCompletion(
             onCancelling = true,
@@ -149,13 +114,9 @@ abstract class NetworkBoundResource<ResponseObject, CacheObject, ViewStateType>(
             handler = object : CompletionHandler {
                 override fun invoke(cause: Throwable?) {
                     if (job.isCancelled) {
-                        Log.e(TAG, "NetworkBoundResource: Job has been cancelled.")
                         cause?.let {
                             onErrorReturn(it.message, false, true)
                         } ?: onErrorReturn(ErrorHandling.ERROR_UNKNOWN, false, true)
-                    } else if (job.isCompleted) {
-                        Log.e(TAG, "NetworkBoundResource: Job has been completed.")
-                        // do nothing. Should be handled already
                     }
                 }
             })
@@ -165,15 +126,9 @@ abstract class NetworkBoundResource<ResponseObject, CacheObject, ViewStateType>(
 
     fun asLiveData() = result as LiveData<DataState<ViewStateType>>
 
-    abstract suspend fun createCasheRequestAndReturn()
-
     abstract suspend fun handleApiSuccessResponse(response: ApiSuccessResponse<ResponseObject>)
 
     abstract fun createCall(): LiveData<GenericApiResponse<ResponseObject>>
-
-    abstract fun loadFromCache(): LiveData<ViewStateType>
-
-    abstract suspend fun updateLocalDb(cacheObject: CacheObject?)
 
     abstract fun setJob(job: Job)
 
