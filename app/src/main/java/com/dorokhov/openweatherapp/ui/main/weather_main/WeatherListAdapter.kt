@@ -1,11 +1,11 @@
 package com.dorokhov.openweatherapp.ui.main.weather_main
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.*
 import com.bumptech.glide.RequestManager
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade
 import com.dorokhov.openweatherapp.R
 import com.dorokhov.openweatherapp.model.WeatherModel
 import kotlinx.android.synthetic.main.weather_item_list.view.*
@@ -13,10 +13,7 @@ import kotlinx.android.synthetic.main.weather_item_list.view.*
 class WeatherListAdapter(
     private val interaction: Interaction? = null,
     private val requestManager: RequestManager
-): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-
-    private val WEATHER_ITEM = 0
-    private val OTHER_ITEM = -1
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     val DIFF_CALLBACK = object : DiffUtil.ItemCallback<WeatherModel>() {
 
@@ -51,35 +48,21 @@ class WeatherListAdapter(
         }
 
         override fun onRemoved(position: Int, count: Int) {
-            adapter.notifyItemRemoved(position)
-           // adapter.notifyDataSetChanged()
+            adapter.notifyItemRangeRemoved(position, count)
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        when (viewType) {
-            WEATHER_ITEM -> {
-                return WeatherViewHolder(
-                    itemView = LayoutInflater.from(parent.context).inflate(
-                        R.layout.weather_item_list,
-                        parent,
-                        false
-                    ),
-                    requestManager = requestManager,
-                    interaction = interaction
-                )
-            } else -> {
-            return WeatherViewHolder(
-                itemView = LayoutInflater.from(parent.context).inflate(
-                    R.layout.weather_item_list,
-                    parent,
-                    false
-                ),
-                requestManager = requestManager,
-                interaction = interaction
-            )
-        }
-        }
+        return WeatherViewHolder(
+            itemView = LayoutInflater.from(parent.context).inflate(
+                R.layout.weather_item_list,
+                parent,
+                false
+            ),
+            requestManager = requestManager,
+            interaction = interaction
+        )
+
     }
 
     override fun getItemCount(): Int = differ.currentList.size
@@ -92,16 +75,7 @@ class WeatherListAdapter(
         }
     }
 
-    override fun getItemViewType(position: Int): Int {
-        if (differ.currentList.get(position).id > -1) {
-            return WEATHER_ITEM
-        } else {
-            return -1
-        }
-    }
-
     fun submitList(list: List<WeatherModel>?) {
-        val newList = list?.toMutableList()
         differ.submitList(list)
     }
 
@@ -118,12 +92,12 @@ class WeatherListAdapter(
             }
 
             itemView.city_name_textView.text = item.city
-            itemView.temperature.text = itemView.context.getString(R.string.temp_string, item.temperature)
+            itemView.temperature.text =
+                itemView.context.getString(R.string.temp_string, item.temperature)
             itemView.description_textView.text = item.description
 
             requestManager
                 .load(item.icon)
-                .transition(withCrossFade())
                 .into(itemView.weather_imageView)
 
         }

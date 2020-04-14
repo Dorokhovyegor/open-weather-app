@@ -9,16 +9,15 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.dorokhov.openweatherapp.R
-import com.dorokhov.openweatherapp.api.responses.SingleItemWeather
 import com.dorokhov.openweatherapp.model.WeatherModel
 import com.dorokhov.openweatherapp.ui.main.weather_main.state.WeatherStateEvent
 import com.dorokhov.openweatherapp.ui.main.weather_main.viewmodel.removeWeatherItem
 import com.dorokhov.openweatherapp.ui.main.weather_main.viewmodel.setWeatherListData
 import kotlinx.android.synthetic.main.fragment_weather.*
-import java.util.ArrayList
 
 
-class ViewWeatherFragment : BaseWeatherFragment(),  SwipeRefreshLayout.OnRefreshListener, WeatherListAdapter.Interaction {
+class ViewWeatherFragment : BaseWeatherFragment(), SwipeRefreshLayout.OnRefreshListener,
+    WeatherListAdapter.Interaction {
 
     private lateinit var recyclerViewAdapter: WeatherListAdapter
 
@@ -28,7 +27,7 @@ class ViewWeatherFragment : BaseWeatherFragment(),  SwipeRefreshLayout.OnRefresh
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-       return inflater.inflate(R.layout.fragment_weather, container,false)
+        return inflater.inflate(R.layout.fragment_weather, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -45,12 +44,12 @@ class ViewWeatherFragment : BaseWeatherFragment(),  SwipeRefreshLayout.OnRefresh
     }
 
     private fun subscribeObserver() {
-        weatherViewModel.dataState.observe(viewLifecycleOwner, Observer { dataState->
+        weatherViewModel.dataState.observe(viewLifecycleOwner, Observer { dataState ->
             if (dataState != null) {
                 stateChangeListener.onDataStateChange(dataState)
-                dataState.data?.let { data->
+                dataState.data?.let { data ->
                     data.data?.let { event ->
-                        event.getContentIfNotHandled()?.let { viewState->
+                        event.getContentIfNotHandled()?.let { viewState ->
                             weatherViewModel.setWeatherListData(viewState.weatherFields.weatherList)
                         }
                     }
@@ -58,7 +57,7 @@ class ViewWeatherFragment : BaseWeatherFragment(),  SwipeRefreshLayout.OnRefresh
             }
         })
 
-        weatherViewModel.viewState.observe(viewLifecycleOwner, Observer { viewState->
+        weatherViewModel.viewState.observe(viewLifecycleOwner, Observer { viewState ->
             Log.e("ViewWeather", viewState.toString())
             if (viewState != null) {
                 if (viewState.weatherFields.weatherList.isEmpty()) {
@@ -70,6 +69,8 @@ class ViewWeatherFragment : BaseWeatherFragment(),  SwipeRefreshLayout.OnRefresh
                 recyclerViewAdapter.submitList(
                     list = viewState.weatherFields.weatherList
                 )
+
+
             }
         })
     }
