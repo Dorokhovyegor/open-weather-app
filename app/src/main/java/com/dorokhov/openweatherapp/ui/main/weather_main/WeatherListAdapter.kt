@@ -16,6 +16,7 @@ class WeatherListAdapter(
 ): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val WEATHER_ITEM = 0
+    private val OTHER_ITEM = -1
 
     val DIFF_CALLBACK = object : DiffUtil.ItemCallback<WeatherModel>() {
 
@@ -51,6 +52,7 @@ class WeatherListAdapter(
 
         override fun onRemoved(position: Int, count: Int) {
             adapter.notifyItemRemoved(position)
+           // adapter.notifyDataSetChanged()
         }
     }
 

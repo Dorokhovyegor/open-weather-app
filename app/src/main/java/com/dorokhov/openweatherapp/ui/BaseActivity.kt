@@ -1,6 +1,7 @@
 package com.dorokhov.openweatherapp.ui
 
 import android.util.Log
+import com.dorokhov.openweatherapp.utils.ErrorHandling
 import com.dorokhov.openweatherapp.utils.NetworkManager
 import dagger.android.support.DaggerAppCompatActivity
 import kotlinx.coroutines.Dispatchers.Main
@@ -65,7 +66,7 @@ abstract class BaseActivity : DaggerAppCompatActivity(), DataStateChangeListener
                 }
                 is ResponseType.Dialog -> {
                     it.response.message?.let {message ->
-                        displayErrorDialog(message)
+                        displayErrorDialog(ErrorHandling.prettyMessage(message))
                     }
                 }
                 is ResponseType.None -> {

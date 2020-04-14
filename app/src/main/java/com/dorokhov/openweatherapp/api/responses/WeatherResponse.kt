@@ -18,5 +18,5 @@ data class WeatherResponse(
     val list: List<SingleItemWeather>?,
     @SerializedName("message")
     @Expose
-    val message: String?
+    val message: String
 )
